@@ -1,0 +1,10 @@
+[package]
+name = "chip8-core"
+description = "CHIP-8 virtual machine: memory, registers, timers, and the full instruction set"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]

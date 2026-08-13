@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iron-chip — a CHIP-8 emulator in Rust, running in your browser</title>
+  <meta name="description" content="A CHIP-8 virtual machine written in Rust, compiled to WebAssembly and rendered with WebGL. By Naman Uttamchandani.">
+  <style>
+    :root {
+      --paper: #f4f5f2;
+      --ink: #1b211e;
+      --muted: #626b66;
+      --line: #dde0da;
+      --accent: #b4530a;
+      --device-bg: #12160f;
+      --phosphor: #f5a73b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1.25rem 3rem;
+    }
+    main { width: 100%; max-width: 44rem; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    h1 { font-size: 1.5rem; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+    h1 .cursor { color: var(--accent); animation: blink 1.2s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.6rem; }
+    a { color: var(--accent); }
+    .device {
+      background: var(--device-bg);
+      border-radius: 10px;
+      padding: clamp(0.75rem, 2.5vw, 1.25rem);
+      box-shadow: inset 0 0 0 1px rgba(245, 167, 59, 0.08),
+                  0 1px 2px rgba(27, 33, 30, 0.25),
+                  0 12px 32px -12px rgba(27, 33, 30, 0.35);
+      margin-bottom: 1rem;
+    }
+    #screen {
+      display: block;
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 6px rgba(245, 167, 59, 0.35));
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    select, button, .file-label {
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfbf9;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    select:hover, button:hover, .file-label:hover { border-color: var(--accent); color: var(--accent); }
+    #status { font-size: 0.85rem; color: var(--muted); min-height: 1.3em; margin-bottom: 1.4rem; }
+    #status.error { color: #b3261e; }
+    .keys {
+      border-top: 1px solid var(--line);
+      padding-top: 1.2rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+    }
+    .keys .grids {
+      display: flex;
+      gap: 2rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .keys table { border-collapse: collapse; }
+    .keys td {
+      border: 1px solid var(--line);
+      width: 2rem;
+      height: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--ink);
+      background: #fbfbf9;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding-top: 1.2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer p { margin-bottom: 0.4rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 class="mono">iron-chip<span class="cursor">▮</span></h1>
+    <p class="sub">
+      A CHIP-8 virtual machine written in <strong>Rust</strong>, compiled to
+      <strong>WebAssembly</strong>, rendered with <strong>WebGL</strong> —
+      the same core also runs as a native SDL2 desktop app.
+      <a href="https://github.com/NamanU7/iron-chip">Source ↗</a> ·
+      <a href="https://namanu7.github.io">namanu7.github.io ↗</a>
+    </p>
+
+    <div class="device">
+      <canvas id="screen" width="640" height="320"></canvas>
+    </div>
+
+    <div class="controls">
+      <select id="rom-select" aria-label="Choose a ROM">
+        <option value="3-corax+.ch8">Opcode test (corax+)</option>
+        <option value="1-chip8-logo.ch8">CHIP-8 splash screen</option>
+        <option value="2-ibm-logo.ch8">IBM logo</option>
+        <option value="4-flags.ch8">Flags test</option>
+        <option value="5-quirks.ch8">Quirks detector</option>
+        <option value="6-keypad.ch8">Keypad test</option>
+      </select>
+      <label class="file-label">Load your own ROM<input type="file" id="rom-file" accept=".ch8,.rom" hidden></label>
+      <button id="pause">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+    <p id="status" class="mono">Loading…</p>
+
+    <div class="keys">
+      The 16-key CHIP-8 keypad maps onto your keyboard:
+      <div class="grids">
+        <table class="mono" aria-label="Your keyboard">
+          <tr><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+          <tr><td>Q</td><td>W</td><td>E</td><td>R</td></tr>
+          <tr><td>A</td><td>S</td><td>D</td><td>F</td></tr>
+          <tr><td>Z</td><td>X</td><td>C</td><td>V</td></tr>
+        </table>
+        <table class="mono" aria-label="CHIP-8 keypad">
+          <tr><td>1</td><td>2</td><td>3</td><td>C</td></tr>
+          <tr><td>4</td><td>5</td><td>6</td><td>D</td></tr>
+          <tr><td>7</td><td>8</td><td>9</td><td>E</td></tr>
+          <tr><td>A</td><td>0</td><td>B</td><td>F</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Bundled test ROMs are from
+        <a href="https://github.com/Timendus/chip8-test-suite">Timendus' CHIP-8 test suite</a>
+        (GPLv3). Emulator © Naman Uttamchandani, MIT license.
+      </p>
+      <p>Sound on: some ROMs beep. Drag in any <span class="mono">.ch8</span> file to run it.</p>
+    </footer>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

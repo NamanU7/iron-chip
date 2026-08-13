@@ -1,0 +1,16 @@
+[package]
+name = "iron-chip"
+description = "CHIP-8 emulator — SDL2 desktop frontend"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "iron-chip"
+path = "src/main.rs"
+
+[dependencies]
+chip8-core = { path = "../chip8-core" }
+sdl2 = { version = "0.37", features = ["bundled"] }
