@@ -59,7 +59,11 @@ impl core::fmt::Display for Chip8Error {
             Chip8Error::StackOverflow => write!(f, "call stack overflow"),
             Chip8Error::StackUnderflow => write!(f, "return with empty call stack"),
             Chip8Error::RomTooLarge(n) => {
-                write!(f, "ROM is {n} bytes; at most {} fit", MEMORY_SIZE - PROGRAM_START)
+                write!(
+                    f,
+                    "ROM is {n} bytes; at most {} fit",
+                    MEMORY_SIZE - PROGRAM_START
+                )
             }
         }
     }

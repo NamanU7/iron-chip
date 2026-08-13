@@ -29,7 +29,11 @@ impl AudioCallback for SquareWave {
 
     fn callback(&mut self, out: &mut [f32]) {
         for sample in out.iter_mut() {
-            *sample = if self.phase < 0.5 { self.volume } else { -self.volume };
+            *sample = if self.phase < 0.5 {
+                self.volume
+            } else {
+                -self.volume
+            };
             self.phase = (self.phase + self.phase_inc) % 1.0;
         }
     }
@@ -73,8 +77,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
-            "--scale" => scale = args.next().and_then(|v| v.parse().ok()).unwrap_or_else(|| usage()),
-            "--ipf" => ipf = args.next().and_then(|v| v.parse().ok()).unwrap_or_else(|| usage()),
+            "--scale" => {
+                scale = args
+                    .next()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or_else(|| usage())
+            }
+            "--ipf" => {
+                ipf = args
+                    .next()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or_else(|| usage())
+            }
             "--help" | "-h" => usage(),
             _ if rom_path.is_none() => rom_path = Some(arg),
             _ => usage(),
@@ -119,20 +133,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         for event in events.poll_iter() {
             match event {
                 Event::Quit { .. }
-                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
-                Event::KeyDown { keycode: Some(Keycode::P), repeat: false, .. } => {
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(Keycode::P),
+                    repeat: false,
+                    ..
+                } => {
                     paused = !paused;
                 }
-                Event::KeyDown { keycode: Some(Keycode::Backspace), repeat: false, .. } => {
+                Event::KeyDown {
+                    keycode: Some(Keycode::Backspace),
+                    repeat: false,
+                    ..
+                } => {
                     chip8.reset();
                     chip8.load_rom(&rom)?;
                 }
-                Event::KeyDown { keycode: Some(key), repeat: false, .. } => {
+                Event::KeyDown {
+                    keycode: Some(key),
+                    repeat: false,
+                    ..
+                } => {
                     if let Some(k) = keymap(key) {
                         chip8.key_down(k);
                     }
                 }
-                Event::KeyUp { keycode: Some(key), .. } => {
+                Event::KeyUp {
+                    keycode: Some(key), ..
+                } => {
                     if let Some(k) = keymap(key) {
                         chip8.key_up(k);
                     }

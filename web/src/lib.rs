@@ -57,7 +57,10 @@ fn compile_shader(gl: &Gl, kind: u32, source: &str) -> Result<WebGlShader, Strin
 fn link_program(gl: &Gl, vertex: &str, fragment: &str) -> Result<WebGlProgram, String> {
     let program = gl.create_program().ok_or("failed to create program")?;
     gl.attach_shader(&program, &compile_shader(gl, Gl::VERTEX_SHADER, vertex)?);
-    gl.attach_shader(&program, &compile_shader(gl, Gl::FRAGMENT_SHADER, fragment)?);
+    gl.attach_shader(
+        &program,
+        &compile_shader(gl, Gl::FRAGMENT_SHADER, fragment)?,
+    );
     gl.link_program(&program);
     if gl
         .get_program_parameter(&program, Gl::LINK_STATUS)
@@ -89,9 +92,8 @@ impl Emulator {
             .ok_or_else(|| JsValue::from_str("WebGL is not available"))?
             .dyn_into()?;
 
-        let program = link_program(&gl, VERTEX_SHADER, FRAGMENT_SHADER).map_err(|e| {
-            JsValue::from_str(&e)
-        })?;
+        let program =
+            link_program(&gl, VERTEX_SHADER, FRAGMENT_SHADER).map_err(|e| JsValue::from_str(&e))?;
         gl.use_program(Some(&program));
 
         // A full-canvas quad as a triangle strip.
@@ -115,10 +117,7 @@ impl Emulator {
         gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_S, Gl::CLAMP_TO_EDGE as i32);
         gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_T, Gl::CLAMP_TO_EDGE as i32);
 
-        gl.uniform3fv_with_f32_array(
-            gl.get_uniform_location(&program, "u_lit").as_ref(),
-            &LIT,
-        );
+        gl.uniform3fv_with_f32_array(gl.get_uniform_location(&program, "u_lit").as_ref(), &LIT);
         gl.uniform3fv_with_f32_array(
             gl.get_uniform_location(&program, "u_unlit").as_ref(),
             &UNLIT,
