@@ -9,6 +9,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # SDL2's vendored CMake project declares a minimum older than CMake 4 allows
+  CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+
 jobs:
   test:
     name: Format, lint, test, build desktop

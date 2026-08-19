@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+env:
+  # SDL2's vendored CMake project declares a minimum older than CMake 4 allows
+  CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+
 jobs:
   build:
     name: Build ${{ matrix.target }}
