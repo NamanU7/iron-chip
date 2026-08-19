@@ -10,6 +10,13 @@ the display. One core, two frontends:
 - **Browser** — the same core compiled to WebAssembly, drawn with WebGL
 
 **▶ [Run it in your browser](https://namanu7.github.io/iron-chip/)** — no install, ROMs included.
+Desktop binaries for Linux, macOS, and Windows are on the
+[releases page](https://github.com/NamanU7/iron-chip/releases).
+
+<p align="center">
+  <img src="docs/corax.png" alt="iron-chip running the corax+ opcode test: every instruction group followed by a passing checkmark" width="720">
+</p>
+<p align="center"><em>Actual emulator output: the corax+ opcode test, every group passing.</em></p>
 
 ## Layout
 
@@ -43,6 +50,10 @@ cp roms/timendus/*.ch8 dist/roms/
 ```
 
 ### Desktop
+
+Grab a prebuilt binary from the
+[releases page](https://github.com/NamanU7/iron-chip/releases), or build from
+source:
 
 ```bash
 cargo run --release -p iron-chip -- roms/timendus/3-corax+.ch8
