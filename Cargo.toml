@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["chip8-core", "desktop", "web"]
+members = ["chip8-core", "desktop", "web", "tools/framegrab"]
 
 [workspace.package]
 version = "1.0.0"

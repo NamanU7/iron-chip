@@ -21,11 +21,18 @@ Desktop binaries for Linux, macOS, and Windows are on the
 ## Layout
 
 ```
-chip8-core/   the virtual machine: fetch/decode/execute, timers, framebuffer.
-              No I/O, no dependencies — pure state machine + unit tests.
-desktop/      SDL2 frontend (binary: iron-chip)
-web/          wasm-bindgen + WebGL frontend and the demo page
-roms/         bundled test ROMs (Timendus' CHIP-8 test suite, GPLv3)
+chip8-core/       the virtual machine: fetch/decode/execute, timers, framebuffer.
+                  No I/O, no dependencies — pure state machine + unit tests.
+desktop/          SDL2 frontend (binary: iron-chip)
+web/              wasm-bindgen + WebGL frontend and the demo page
+roms/             bundled test ROMs (Timendus' CHIP-8 test suite, GPLv3)
+tools/framegrab   run a ROM headless, render the framebuffer to a PNG
+```
+
+The screenshots in this README are actual emulator output, generated with:
+
+```bash
+cargo run -p framegrab -- roms/timendus/3-corax+.ch8 docs/corax.png 5000
 ```
 
 The core exposes a deliberately small surface — `step()`, `tick_timers()`,

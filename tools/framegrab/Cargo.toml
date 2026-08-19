@@ -1,0 +1,12 @@
+[package]
+name = "framegrab"
+description = "Dev tool: run a ROM headless and render the framebuffer to a PNG"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+chip8-core = { path = "../../chip8-core" }
+png = "0.17"
